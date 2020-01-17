@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -10,8 +11,19 @@ import (
 
 func checkErr(err error) {
 	if err != nil {
+		fmt.Println("There is a problem with the given command line argument.")
 		os.Exit(2)
 	}
+}
+
+func isDiff(a, b string) bool {
+	dmp := diff.New()
+	diffs := dmp.DiffMain(a, b, false)
+
+	if len(diffs) != 1 { // 差分が無い場合は1が帰ってくる
+		return true
+	}
+	return false
 }
 
 func main() {
@@ -29,11 +41,9 @@ func main() {
 	text2, err := ioutil.ReadAll(f2)
 	checkErr(err)
 
-	dmp := diff.New()
-	diffs := dmp.DiffMain(string(text1), string(text2), false)
-
-	// 一緒の場合は1が帰ってくる
-	if len(diffs) != 1 {
+	if isDiff(string(text1), string(text2)) {
+		os.Exit(0)
+	} else {
 		os.Exit(1)
 	}
 }
